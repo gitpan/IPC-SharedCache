@@ -1,6 +1,6 @@
 package IPC::SharedCache;
 
-$IPC::SharedCache::VERSION = '1.2';
+$IPC::SharedCache::VERSION = '1.3';
 
 =pod 
 
@@ -326,8 +326,7 @@ and a dump of the objects stored in each key.  Be warned, this can be
 quite a lot of data!  Also, you'll need the Data::Dumper module
 installed to use 'walk'.  You can get it on CPAN.
 
-You can
-call walk like:
+You can call walk like:
 
    perl -MIPC::SharedCache -e 'IPC::SharedCache::walk AKEY'"
 
@@ -398,6 +397,8 @@ The following people have contributed patches, ideas or new features:
    Tim Bunce
    Roland Mas
    Drew Taylor
+   Ed Loehr
+   Maverick
 
 Thanks everyone!
 
@@ -675,7 +676,10 @@ sub DELETE {
   # look in the cache map for a record matching this key
   $root_record = $self->_get_root_record($root);
     
-  return 1 unless (exists $root_record->{'map'}{$key});
+  unless (exists $root_record->{'map'}{$key}) {
+    _unlock($root);
+    return 1;
+  }
   $obj_ipc_key = $root_record->{'map'}{$key};
 
   # delete the segment for this object
@@ -1064,9 +1068,9 @@ sub _validate {
   if ($validate_type eq 'CODE') {
     return $validate_callback->($key, $object);
   } elsif ($validate_type eq 'ARRAY') {
-    my $real_callback = shift @$validate_callback;
+    my ($real_callback,@params) = @$validate_callback;
     if (ref($real_callback) eq 'CODE') {
-      return $real_callback->(@$validate_callback, $key, $object);
+      return $real_callback->(@params, $key, $object);
     } else {
       croak("IPC::SharedCache : validate_callback set to bad value - when set to an array the first element must be a CODE ref.");
     }
@@ -1085,9 +1089,9 @@ sub _load {
   if ($load_type eq 'CODE') {
     return $load_callback->($key);
   } elsif ($load_type eq 'ARRAY') {
-    my $real_callback = shift @$load_callback;
+    my ($real_callback, @params) = @{$load_callback};
     if (ref($real_callback) eq 'CODE') {
-      return $real_callback->(@$load_callback, $key);
+      return $real_callback->(@params, $key);
     } else {
       croak("IPC::SharedCache : load_callback set to bad value - when set to an array the first element must be a CODE ref.");
     }

@@ -1,13 +1,16 @@
-ANNOUNCEMENT: NEW MODULE: IPC::SharedCache 1.2
+ANNOUNCEMENT: NEW MODULE: IPC::SharedCache 1.3
 
 IPC::SharedCache - a Perl module to manage a cache in SysV IPC shared
 memory.
 
 CHANGES
 
-1.2 
+1.3
 
-    - Critical Bug Fix: validate_callback was effectively ignored!
+- Bug Fix: missing _unlock() in DELETE rectified. (Ed Loehr)
+
+- Bug Fix: callback array refs were being eaten on cache access. 
+           (Maverick)
 
 SHORT DESCRIPTION
 
@@ -31,7 +34,7 @@ AVAILABILITY
 
 This module is available on SourceForge.  Download it at:
 
-  http://download.sourceforge.net/HTML-Template/IPC-SharedCache-1.2.tar.gz
+  http://download.sourceforge.net/HTML-Template/IPC-SharedCache-1.3.tar.gz
 
 The module is also available on CPAN.  You can get it using CPAN.pm or
 go to:
