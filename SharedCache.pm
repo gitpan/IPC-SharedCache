@@ -1,6 +1,6 @@
 package IPC::SharedCache;
 
-$IPC::SharedCache::VERSION = '1.0';
+$IPC::SharedCache::VERSION = '1.2';
 
 =pod 
 
@@ -393,6 +393,14 @@ demonstrating the problem.
 I would like to thank Maurice Aubrey for making this module possible
 by producing the excelent IPC::ShareLite.
 
+The following people have contributed patches, ideas or new features:
+
+   Tim Bunce
+   Roland Mas
+   Drew Taylor
+
+Thanks everyone!
+
 =head1 AUTHOR
 
 Sam Tregar, sam@tregar.com (you can also find me on the mailing list
@@ -513,12 +521,21 @@ sub FETCH {
     
   # test its validity with _validate, if not get it with _load and
   # STORE it.   Do the same if it wasn't there.  If it passes, return it.
-  return $object
-    if ((defined $object) and
-        ($self->_validate($key, $object)));
+  if (defined($object)) {
+    my $result;
+
+    eval { $result = $self->_validate($key, $object); }; 
+    croak("Error occured during validate_callback: $@") if $@;
+
+    _debug("VALIDATE RETURN TRUE FOR: $key") if $options->{debug} and $result;
+    _debug("VALIDATE RETURN FALSE FOR: $key") if $options->{debug} and not $result;
+    return $object if $result;
+  }
 
   # if it didn't pass, load it and STORE it.  Then return it.
-  $object = $self->_load($object);
+  eval { $object = $self->_load($key); };
+  croak("Error occured during load_callback: $@") if $@;
+
   $self->STORE($key, $object) if defined $object;
   return $object;
 }
@@ -1063,7 +1080,8 @@ sub _load {
   my ($self, $key) = @_;
   my $load_callback = $self->{options}{load_callback};
   my $load_type = ref($load_callback);
-
+  my $result;
+  
   if ($load_type eq 'CODE') {
     return $load_callback->($key);
   } elsif ($load_type eq 'ARRAY') {

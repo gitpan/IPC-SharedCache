@@ -6,7 +6,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..1\n"; }
+BEGIN { $| = 1; print "1..9\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use IPC::SharedCache;
 $loaded = 1;
@@ -107,3 +107,18 @@ print "ok 9\n";
 untie %mcache;
 IPC::SharedCache::remove('MYKI');
 
+#my %cache;
+#tie %cache, 'IPC::SharedCache', 
+#  ipc_key => 'MYKI',
+#  load_callback => sub { die "blah" },
+#  validate_callback => sub { return 1; },
+#  max_size => 4500,
+#  debug => 0;
+#print "ok 10\n";
+#
+#my $z = $cache{'z'};
+#
+#{ 
+#  print "ok 11\n";
+#}
+# IPC::SharedCache::remove('MYKI');
