@@ -1,0 +1,6 @@
+Revision history for Perl extension IPC::SharedCache.
+
+1.0 
+    - original version, broken off from HTML::Template and rewritten
+      from scratch.
+
